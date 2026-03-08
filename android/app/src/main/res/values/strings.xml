@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">UmmahSync</string>
+    <string name="title_activity_main">UmmahSync</string>
+    <string name="package_name">v3.ummahsync.app</string>
+    <string name="custom_url_scheme">v3.ummahsync.app</string>
+</resources>
