@@ -38,9 +38,8 @@ import {
   resumeAudio, registerServiceWorker
 } from './sounds.js';
 
-// Backend URL resolution: Use environment variable for production, or fallback to LAN/localhost for dev
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
-  `${window.location.protocol}//${window.location.hostname}:3001`;
+// Backend URL resolution: Use environment variable for production, or fallback to the official Render service
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://ummah-sync.onrender.com';
 
 const socket = io(BACKEND_URL, { 
     secure: true, 
