@@ -86,8 +86,6 @@ body {
   background: var(--wa-bg-chat);
   color: var(--wa-text-main);
   -webkit-font-smoothing: antialiased;
-  height: 100vh;
-  overflow: hidden;
 }
 
 button {
