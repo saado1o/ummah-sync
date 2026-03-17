@@ -1,6 +1,6 @@
 {
-    "name": "UmmahSync",
-    "short_name": "UmmahSync",
+    "name": "ummah-sync",
+    "short_name": "ummah-sync",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#075E54",

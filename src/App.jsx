@@ -4,10 +4,20 @@ import {
   Phone, Video, ShieldCheck, HeartPulse, Sparkles, LogOut,
   Mic, Square, PhoneOff, MicOff, VideoOff, Settings, User,
   FileText, X, ChevronLeft, Circle, Bell, Check,
-  Camera, Image, Type, Plus, CheckCheck, Volume2, VolumeX
+  Camera, Image, Type, Plus, CheckCheck, Volume2, VolumeX,
+  Menu, Globe, Lock, Cpu, Database, Users, Mail, MapPin, Linkedin, Github
 } from 'lucide-react';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import EmojiPicker from 'emoji-picker-react';
 import './index.css';
+
+// Import new components
+import LandingLayout from './components/LandingLayout';
+import Home from './pages/Home';
+import Features from './pages/Features';
+import TechStack from './pages/TechStack';
+import Contact from './pages/Contact';
+
 import { auth, db, storage } from './firebase';
 import {
   onAuthStateChanged, signInWithEmailAndPassword,
@@ -28,11 +38,15 @@ import {
   resumeAudio, registerServiceWorker
 } from './sounds.js';
 
-// Dynamically resolve backend host so mobile devices on the same WiFi can connect
-const BACKEND_HOST = window.location.hostname;
-const PROTOCOL = window.location.protocol; // Includes the colon (e.g., 'https:')
-const BACKEND_URL = `${PROTOCOL}//${BACKEND_HOST}:3001`;
-const socket = io(BACKEND_URL, { secure: true, rejectUnauthorized: false });
+// Backend URL resolution: Use environment variable for production, or fallback to LAN/localhost for dev
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
+  `${window.location.protocol}//${window.location.hostname}:3001`;
+
+const socket = io(BACKEND_URL, { 
+    secure: true, 
+    rejectUnauthorized: false,
+    transports: ['websocket', 'polling'] // Better compatibility for cloud hosting
+});
 
 // Helper: format timestamp nicely
 const formatTimestamp = (ts) => {
@@ -93,7 +107,7 @@ function Login() {
     // Normalize: strip spaces/dashes, ensure it starts with +
     const cleaned = phoneNumber.replace(/[\s\-()]/g, '');
     const normalized = cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
-    return `${normalized}@ummahsync.app`;
+    return `${normalized}@ummah-sync.app`;
   };
 
   const handlePhonePinAuth = async (e) => {
@@ -125,7 +139,7 @@ function Login() {
     <div className="auth-container">
       <div style={{ background: 'white', padding: '2.5rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '420px', boxShadow: 'var(--shadow-lg)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <img src="/logo.png" alt="UmmahSync Logo" style={{ width: 240, height: 240, borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }} />
+          <img src="/logo.png" alt="ummah-sync Logo" style={{ width: 240, height: 240, borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem', position: 'relative' }}>
           {isRegistering && (
@@ -137,8 +151,8 @@ function Login() {
             </button>
           )}
           <h2 style={{ flex: 1, textAlign: 'center', margin: 0, color: 'var(--color-primary-navy)', fontSize: '1.3rem', fontWeight: 'bold' }}>
-            {isRegistering ? 'Create Account' : 'SBF-Talk Entry'}
-          </h2>
+            {isRegistering ? 'Create Account' : 'Ummah-Sync'}
+          </h2> 
         </div>
 
         {error && <div style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>}
@@ -158,18 +172,22 @@ function Login() {
           <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <input
               type="email"
-              placeholder="Professional Email"
+              placeholder="Email Address"
+              className="auth-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', width: '100%', fontSize: '0.95rem' }}
+              autoComplete="email"
               required
             />
             <input
               type="password"
               placeholder="Password"
+              className="auth-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', width: '100%', fontSize: '0.95rem' }}
+              autoComplete="current-password"
               required
             />
             <button
@@ -199,6 +217,7 @@ function Login() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', width: '100%', fontSize: '0.95rem' }}
+              autoComplete="tel"
               required
             />
             <input
@@ -210,6 +229,7 @@ function Login() {
               pattern="[0-9]*"
               onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
               style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', width: '100%', fontSize: '1.2rem', letterSpacing: '0.3rem' }}
+              autoComplete={isRegistering ? "new-password" : "current-password"}
               required
             />
             <button
@@ -253,10 +273,10 @@ function ChatApp({ user }) {
   const [activeChat, setActiveChat] = useState("SBF Global Team");
   const [contacts, setContacts] = useState(["SBF Global Team"]);
   const [newContact, setNewContact] = useState("");
-  // For phone+PIN users, the Firebase email is +number@ummahsync.app  show the real number
+  // For phone+PIN users, the Firebase email is +number@ummah-sync.app  show the real number
   const rawIdentifier = user.email || user.phoneNumber || user.uid;
-  const myIdentifier = rawIdentifier.endsWith('@ummahsync.app')
-    ? rawIdentifier.replace('@ummahsync.app', '')
+  const myIdentifier = rawIdentifier.endsWith('@ummah-sync.app')
+    ? rawIdentifier.replace('@ummah-sync.app', '')
     : rawIdentifier;
 
   const [profile, setProfile] = useState({ name: myIdentifier, about: 'Available', theme: 'light', wallpaper: '', photoURL: '' });
@@ -866,7 +886,7 @@ function ChatApp({ user }) {
       <div className="sidebar" style={{ display: mobileChatOpen ? 'none' : 'flex' }}>
         <div className="sidebar-header" style={{ minHeight: 120 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 15, flex: 1 }}>
-            <img src="/logo.png" alt="UmmahSync" style={{ width: 96, height: 96, borderRadius: 12 }} />
+            <img src="/logo.png" alt="ummah-sync" style={{ width: 96, height: 96, borderRadius: 12 }} />
             <h1 className="sidebar-title" style={{ fontSize: '1.5rem' }}>{sidebarTab.charAt(0).toUpperCase() + sidebarTab.slice(1)}</h1>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -1091,8 +1111,8 @@ function ChatApp({ user }) {
           </>
         ) : (
           <div className="no-chat">
-            <img src="/logo.png" alt="UmmahSync" style={{ width: 300, height: 300, opacity: 0.15, filter: 'grayscale(1)', marginBottom: 30 }} />
-            <h3>UmmahSync</h3>
+            <img src="/logo.png" alt="ummah-sync" style={{ width: 300, height: 300, opacity: 0.15, filter: 'grayscale(1)', marginBottom: 30 }} />
+            <h3>ummah-sync</h3>
             <p>Your private, Shariah-compliant messaging platform. Select a chat to begin.</p>
             <p style={{ fontSize: '0.78rem', color: 'var(--wa-text-sub)', marginTop: 8 }}>End-to-end encrypted</p>
           </div>
@@ -1349,7 +1369,26 @@ function App() {
     );
   }
 
-  return user ? <ChatApp user={user} /> : <Login />;
+  return (
+    <Routes>
+      {/* Landing Site Routes */}
+      <Route element={<LandingLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/tech" element={<TechStack />} />
+        <Route path="/contact" element={<Contact />} />
+      </Route>
+
+      {/* Messaging App Route */}
+      <Route 
+        path="/app" 
+        element={user ? <ChatApp user={user} /> : <Login />} 
+      />
+
+      {/* Catch-all - redirect to home */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
 }
 
 export default App;

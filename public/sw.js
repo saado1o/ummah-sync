@@ -1,4 +1,4 @@
-// UmmahSync Service Worker  handles background push notifications
+// ummah-sync Service Worker  handles background push notifications
 // Placed in /public/ so Vite serves it at root scope
 
 self.addEventListener('install', (e) => {
@@ -11,7 +11,7 @@ self.addEventListener('activate', (e) => {
 
 // Handle push events from the Push API (server-sent push)
 self.addEventListener('push', (e) => {
-    let data = { title: 'UmmahSync', body: 'You have a new notification' };
+    let data = { title: 'ummah-sync', body: 'You have a new notification' };
     try { data = e.data.json(); } catch (_) { }
     e.waitUntil(
         self.registration.showNotification(data.title, {
@@ -19,7 +19,7 @@ self.addEventListener('push', (e) => {
             icon: '/vite.svg',
             badge: '/vite.svg',
             vibrate: [200, 100, 200],
-            tag: data.tag || 'ummahsync-notification',
+            tag: data.tag || 'ummah-sync-notification',
             renotify: true,
             data: data,
         })
@@ -50,7 +50,7 @@ self.addEventListener('message', (e) => {
             icon: '/vite.svg',
             badge: '/vite.svg',
             vibrate: vibrate || [200, 100, 200],
-            tag: tag || 'ummahsync',
+            tag: tag || 'ummah-sync',
             renotify: true,
         });
     }

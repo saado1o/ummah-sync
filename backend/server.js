@@ -12,22 +12,29 @@ const os = require('os');
 
 const app = express();
 
-// Try to load mkcert certificates for HTTPS (required for mobile getUserMedia)
-// mkcert certs are stored in the user's home directory
-const certDir = path.join(os.homedir(), '.vite-plugin-mkcert');
+const isProduction = process.env.NODE_ENV === 'production';
 let server;
-try {
-    const keyPath = path.join(certDir, 'dev.pem');
-    const certPath = path.join(certDir, 'cert.pem');
-    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-        server = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, app);
-        console.log('Backend running in HTTPS mode (mobile-compatible)');
-    } else {
-        throw new Error('Certs not found');
-    }
-} catch (e) {
-    console.warn('HTTPS certs not found, falling back to HTTP (mobile getUserMedia may not work):', e.message);
+
+if (isProduction) {
+    // In production (Render, etc.), the platform handles SSL at the proxy
     server = http.createServer(app);
+    console.log('Backend running in HTTP mode (Production proxy handles SSL)');
+} else {
+    // Try to load mkcert certificates for local HTTPS (required for mobile getUserMedia)
+    const certDir = path.join(os.homedir(), '.vite-plugin-mkcert');
+    try {
+        const keyPath = path.join(certDir, 'dev.pem');
+        const certPath = path.join(certDir, 'cert.pem');
+        if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+            server = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, app);
+            console.log('Backend running in HTTPS mode (Local Dev)');
+        } else {
+            throw new Error('Certs not found');
+        }
+    } catch (e) {
+        console.warn('HTTPS certs not found, falling back to HTTP:', e.message);
+        server = http.createServer(app);
+    }
 }
 
 // Allow all origins (LAN devices like mobile phones on the same WiFi)
@@ -77,7 +84,7 @@ app.post('/api/upload-file', upload.single('file'), (req, res) => {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_PROMPT = `
-You are an AI assistant for BERP-Connect (also known as SBF-Talk), a communication platform by SBF-Consultancy.
+You are an AI assistant for ummah-sync, a communication platform by SBF-Consultancy.
 Your goal is to help users communicate more professionally, respectfully, and in a Shariah-compliant manner.
 If asked to suggest a formal response, make it polite, corporate, and incorporate a brief Islamic greeting (like As-salamu alaykum) if appropriate.
 If asked to translate to Urdu, provide an accurate, polite Urdu translation.

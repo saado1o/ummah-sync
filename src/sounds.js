@@ -1,4 +1,4 @@
-// sounds.js  Web Audio API synthesized sounds + SW-backed notifications for UmmahSync
+// sounds.js  Web Audio API synthesized sounds + SW-backed notifications for ummah-sync
 // All sounds generated programmatically  no audio files needed
 
 let audioCtx = null;
@@ -85,7 +85,7 @@ export const registerServiceWorker = async () => {
     if (!('serviceWorker' in navigator)) return;
     try {
         swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-        console.log('UmmahSync SW registered:', swRegistration.scope);
+        console.log('ummah-sync SW registered:', swRegistration.scope);
     } catch (err) {
         console.warn('SW registration failed:', err);
     }
@@ -106,7 +106,7 @@ export const showNotification = (title, body, options = {}) => {
     const payload = {
         title,
         body,
-        tag: options.tag || 'ummahsync',
+        tag: options.tag || 'ummah-sync',
         vibrate: options.vibrate || [200, 100, 200],
         ...options,
     };
