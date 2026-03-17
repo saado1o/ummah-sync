@@ -5,6 +5,7 @@ import mkcert from 'vite-plugin-mkcert'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), mkcert()],
+  base: '/ummah-sync/',
   server: {
     host: true,   // Listen on 0.0.0.0 so mobile devices on the same WiFi can connect
     port: 5173,
