@@ -5,7 +5,7 @@ import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter basename="/ummah-sync">
+    <BrowserRouter basename={window.location.pathname.startsWith('/ummah-sync') ? '/ummah-sync' : '/'}>
       <App />
     </BrowserRouter>
   </StrictMode>,
