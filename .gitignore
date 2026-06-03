@@ -32,3 +32,4 @@ backend/node_modules
 backend/uploads
 *.pem
 .vite-plugin-mkcert
+.vercel

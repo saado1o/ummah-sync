@@ -41,6 +41,11 @@ if (isProduction) {
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+// Basic health check/index route
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', service: 'ummah-sync-backend' });
+});
+
 // Set up static serving for audio uploads
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
