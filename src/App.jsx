@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import EmojiPicker from 'emoji-picker-react';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 
 // Import new components
@@ -1369,24 +1370,27 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Landing Site Routes */}
-      <Route element={<LandingLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/tech" element={<TechStack />} />
-        <Route path="/contact" element={<Contact />} />
-      </Route>
+    <>
+      <Routes>
+        {/* Landing Site Routes */}
+        <Route element={<LandingLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/tech" element={<TechStack />} />
+          <Route path="/contact" element={<Contact />} />
+        </Route>
 
-      {/* Messaging App Route */}
-      <Route 
-        path="/app" 
-        element={user ? <ChatApp user={user} /> : <Login />} 
-      />
+        {/* Messaging App Route */}
+        <Route 
+          path="/app" 
+          element={user ? <ChatApp user={user} /> : <Login />} 
+        />
 
-      {/* Catch-all - redirect to home */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+        {/* Catch-all - redirect to home */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+      <Analytics />
+    </>
   );
 }
 
